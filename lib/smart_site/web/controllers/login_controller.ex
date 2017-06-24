@@ -3,9 +3,12 @@ defmodule SmartSite.Web.LoginController do
 
   alias SmartSite.Accounts.User
 
+  alias SmartSite.Web.ChangesetView
+
   action_fallback SmartSite.Web.FallbackController
 
   def login(conn, params) do
+    IO.inspect User.login_changeset(%User{}, params)
     case User.login_changeset(%User{}, params) do
       {:ok, user} ->
         new_conn = Guardian.Plug.api_sign_in(conn, user)
@@ -21,7 +24,7 @@ defmodule SmartSite.Web.LoginController do
       {:error, changeset} ->
         conn
         |> put_status(401)
-        |> render("error.json", changeset)
+        |> render(ChangesetView, "error.json", %{changeset: changeset})
 
     end
   end

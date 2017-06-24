@@ -62,15 +62,13 @@ defmodule SmartSite.Accounts.User do
 
   defp validate_password(changeset) do
     password = Ecto.Changeset.get_field(changeset, :password)
-    IO.puts Ecto.Changeset.get_field(changeset, :email)
     user =
       Ecto.Changeset.get_field(changeset, :email)
       |> from_email
     validate_password(user, password, changeset)
-
   end
 
-  defp validate_password(nil, _, changeset), do: password_incorrect_error changeset
+  defp validate_password(nil, _, changeset), do: user_incorrect_error changeset
 
   defp validate_password(user, password, changeset) do
     %User { password_hash: hash} = user
@@ -88,5 +86,6 @@ defmodule SmartSite.Accounts.User do
 
   def valid_password?(password, password_hash), do: Comeonin.Bcrypt.checkpw(password, password_hash)
 
-  defp password_incorrect_error(changeset), do: Ecto.Changeset.add_error(changeset, :password, "incorrect password")
+  defp password_incorrect_error(changeset), do: {:error, Ecto.Changeset.add_error(changeset, :password, "incorrect password")}
+  defp user_incorrect_error(changeset), do: {:error, Ecto.Changeset.add_error(changeset, :email, "incorrect email")}
 end
