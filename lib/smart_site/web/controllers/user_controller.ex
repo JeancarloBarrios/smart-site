@@ -4,6 +4,8 @@ defmodule SmartSite.Web.UserController do
   alias SmartSite.Accounts
   alias SmartSite.Accounts.User
 
+  plug Guardian.Plug.EnsureAuthenticated, handler: SmartSite.Web.LoginController
+
   action_fallback SmartSite.Web.FallbackController
 
   def index(conn, _params) do

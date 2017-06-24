@@ -3,7 +3,7 @@ defmodule SmartSite.Accounts.User do
 
 
   alias SmartSite.Accounts.User
-
+  alias SmartSite.Repo
 
   schema "accounts_users" do
     field :email, :string
@@ -17,7 +17,7 @@ defmodule SmartSite.Accounts.User do
 
   def from_email(nil), do: { :error, :not_found }
 
-  def from_email(email), do: Repo.one(User, email: email)
+  def from_email(email), do: Repo.get_by(User, email: email)
 
 
 
@@ -61,17 +61,22 @@ defmodule SmartSite.Accounts.User do
   end
 
   defp validate_password(changeset) do
-    case Ecto.Changeset.get_field(changeset, :password_hash) do
-      nil -> password_incorrect_error(changeset)
-      crypted -> validate_password(changeset, crypted)
-    end
+    password = Ecto.Changeset.get_field(changeset, :password)
+    IO.puts Ecto.Changeset.get_field(changeset, :email)
+    user =
+      Ecto.Changeset.get_field(changeset, :email)
+      |> from_email
+    validate_password(user, password, changeset)
+
   end
 
-  defp validate_password(changeset, crypted) do
-    password = Ecto.Changeset.get_change(changeset, :password)
-    case valid_password?(password, crypted) do
+  defp validate_password(nil, _, changeset), do: password_incorrect_error changeset
+
+  defp validate_password(user, password, changeset) do
+    %User { password_hash: hash} = user
+    case valid_password?(password, hash) do
       true ->
-        changeset
+        {:ok, user}
       false ->
         password_incorrect_error(changeset)
     end
@@ -81,7 +86,7 @@ defmodule SmartSite.Accounts.User do
 
   def valid_password?(_, nil), do: false
 
-  def valid_password?(password, crypted), do: Comeonin.Bcrypt.checkpw(password, crypted)
+  def valid_password?(password, password_hash), do: Comeonin.Bcrypt.checkpw(password, password_hash)
 
   defp password_incorrect_error(changeset), do: Ecto.Changeset.add_error(changeset, :password, "incorrect password")
 end

@@ -35,7 +35,7 @@ config :guardian, Guardian,
   allowed_drift: 2000,
   verify_issuer: true, # optional
   secret_key: "DP+EUUp5tFfk9JTDsS8folmVNp5ltLJfr0MQJRiQvryoNabmUiKDAnIWFGpSywvC",
-  serializer: MyApp.GuardianSerializer
+  serializer: SmartSite.GuardianSerializer
 
 # Uberauth Guardian_DB
 config :guardian_db, GuardianDb,
